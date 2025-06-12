@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone с приложением Настройки</title>
+    <style>
+        :root {
+            --animation-speed: 1;
+            --icon-size: 1;
+            --icon-style: 'classic';
+            --volume-level: 0.5;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f5f5f5;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .iphone {
+            position: relative;
+            width: 300px;
+            height: 600px;
+            background: #000;
+            border-radius: 60px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        
+        .screen {
+            width: 100%;
+            height: 100%;
+            border-radius: 50px;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+        }
+        
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 30px;
+            background: #000;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 100;
+        }
+        
+        /* Кнопка питания */
+        .power-button {
+            position: absolute;
+            right: -3px;
+            top: 120px;
+            width: 6px;
+            height: 70px;
+            background: #ff8c00;
+            border-top-left-radius: 3px;
+            border-bottom-left-radius: 3px;
+            box-shadow: 1px 0 3px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 20;
+        }
+        
+        /* Кнопки громкости */
+        .volume-button-up {
+            position: absolute;
+            left: -3px;
+            top: 100px;
+            width: 6px;
+            height: 40px;
+            background: #ccc;
+            border-top-right-radius: 3px;
+            border-bottom-right-radius: 3px;
+            box-shadow: -1px 0 3px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 20;
+        }
+        
+        .volume-button-down {
+            position: absolute;
+            left: -3px;
+            top: 160px;
+            width: 6px;
+            height: 40px;
+            background: #ccc;
+            border-top-right-radius: 3px;
+            border-bottom-right-radius: 3px;
+            box-shadow: -1px 0 3px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 20;
+        }
+        
+        /* Индикатор громкости */
+        .volume-indicator {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(200px * var(--volume-level));
+            height: 4px;
+            background: white;
+            border-radius: 2px;
+            opacity: 0;
+            transition: opacity 0.3s ease, width 0.2s ease;
+            z-index: 50;
+        }
+        
+        .volume-indicator.active {
+            opacity: 1;
+        }
+        
+        .wallpaper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ffb6c1, #ffa07a, #ff8c69);
+            border-radius: 50px;
+            transition: all calc(0.6s / var(--animation-speed)) cubic-bezier(0.25, 0.1, 0.25, 1);
+            z-index: 1;
+        }
+        
+        /* Иконка настроек (по центру внизу) */
+        .settings-icon {
+            position: absolute;
+            width: calc(60px * var(--icon-size));
+            height: calc(60px * var(--icon-size));
+            background: linear-gradient(135deg, #2d9af0, #0d6efd);
+            border-radius: 12px;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: calc(24px * var(--icon-size));
+            cursor: pointer;
+            z-index: 5;
+            transition: all calc(0.5s / var(--animation-speed)) cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        /* Приложение Настройки */
+        .settings-app {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #f2f2f7;
+            border-radius: 50px;
+            z-index: 4;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all calc(0.5s / var(--animation-speed)) cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            pointer-events: none;
+            top: 0;
+            left: 0;
+        }
+        
+        .settings-header {
+            height: 120px;
+            background: linear-gradient(135deg, #2d9af0, #0d6efd);
+            color: white;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .settings-content {
+            padding: 20px;
+            overflow-y: auto;
+            height: calc(100% - 160px);
+        }
+        
+        .settings-section {
+            margin-bottom: 30px;
+        }
+        
+        .settings-section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2d9af0;
+        }
+        
+        .settings-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e5ea;
+            font-size: 18px;
+        }
+        
+        .settings-item-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .settings-item-value {
+            color: #8e8e93;
+            font-size: 16px;
+        }
+        
+        .settings-button {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #e5e5ea;
+            border-radius: 8px;
+            margin-right: 10px;
+            margin-top: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .settings-button.active {
+            background: #0d6efd;
+            color: white;
+        }
+        
+        /* Кнопка домой */
+        .home-button {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 3px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity calc(0.3s / var(--animation-speed)) ease;
+            cursor: pointer;
+        }
+        
+        /* Состояния */
+        .app-open .wallpaper {
+            filter: blur(5px);
+            opacity: 0.7;
+        }
+        
+        .app-open .settings-icon {
+            transform: translate(-50%, -240px) scale(1.2);
+            opacity: 0;
+        }
+        
+        .app-open .settings-app {
+            transform: scale(1);
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .app-open .home-button {
+            opacity: 1;
+        }
+        
+        /* Блокировка экрана */
+        .screen.locked .wallpaper {
+            width: 160px;
+            height: 160px;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+        }
+        
+        .screen.locked .settings-icon,
+        .screen.locked .settings-app {
+            display: none;
+        }
+        
+        .lock-time {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 48px;
+            font-weight: 300;
+            text-align: center;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity calc(0.3s / var(--animation-speed)) ease 0.2s;
+            line-height: 1.2;
+        }
+        
+        .lock-date {
+            position: absolute;
+            top: 170px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 16px;
+            font-weight: 400;
+            text-align: center;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity calc(0.3s / var(--animation-speed)) ease 0.2s;
+        }
+        
+        .screen.locked .lock-time,
+        .screen.locked .lock-date {
+            opacity: 1;
+        }
+        
+        /* Запрет блокировки при открытом приложении */
+        .app-open .power-button,
+        .app-open .volume-button-up,
+        .app-open .volume-button-down {
+            pointer-events: none;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="iphone">
+        <div class="power-button" id="powerButton"></div>
+        <div class="volume-button-up" id="volumeUp"></div>
+        <div class="volume-button-down" id="volumeDown"></div>
+        <div class="screen" id="screen">
+            <div class="notch"></div>
+            <div class="wallpaper"></div>
+            
+            <!-- Иконка настроек (по центру внизу) -->
+            <div class="settings-icon" id="settingsIcon">⚙️</div>
+            
+            <!-- Приложение Настройки -->
+            <div class="settings-app" id="settingsApp">
+                <div class="settings-header">Настройки</div>
+                <div class="settings-content">
+                    <!-- 1. О телефоне -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">О телефоне</div>
+                        <div class="settings-item">
+                            <div class="settings-item-title">Версия ПО</div>
+                            <div class="settings-item-value">3.0</div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-title">Разработчик</div>
+                            <div class="settings-item-value">Bratt</div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-title">Дата обновления</div>
+                            <div class="settings-item-value">12.06.2025</div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-title">Версия прошивки</div>
+                            <div class="settings-item-value" id="firmwareVersion">A7B9C2D4E5F6</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 2. Настройка анимации -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">Анимации</div>
+                        <div class="settings-item">
+                            <div class="settings-item-title">Скорость анимации</div>
+                            <div>
+                                <span class="settings-button active" data-speed="0.5">0.5x</span>
+                                <span class="settings-button" data-speed="1">1.0x</span>
+                                <span class="settings-button" data-speed="1.5">1.5x</span>
+                                <span class="settings-button" data-speed="2">2.0x</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 3. Настройка меню -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">Меню</div>
+                        <div class="settings-item">
+                            <div class="settings-item-title">Стиль иконок</div>
+                            <div>
+                                <span class="settings-button active" data-style="classic">Классический</span>
+                                <span class="settings-button" data-style="minimal">Минимализм</span>
+                                <span class="settings-button" data-style="3d">3D</span>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div class="settings-item-title">Размер иконок</div>
+                            <div>
+                                <span class="settings-button" data-size="0.8">Малый</span>
+                                <span class="settings-button active" data-size="1">Средний</span>
+                                <span class="settings-button" data-size="1.2">Большой</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="lock-time" id="lockTime"></div>
+            <div class="lock-date" id="lockDate"></div>
+            <div class="home-button" id="homeButton"></div>
+            <div class="volume-indicator" id="volumeIndicator"></div>
+        </div>
+    </div>
+
+    <script>
+        // Текущий уровень громкости (0-1)
+        let volume = 0.5;
+        let volumeTimeout;
+        
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            document.getElementById('lockTime').textContent = `${hours}\n${minutes}`;
+            
+            const options = { weekday: 'long', day: 'numeric', month: 'long' };
+            document.getElementById('lockDate').textContent = now.toLocaleDateString('ru-RU', options);
+        }
+        
+        updateTime();
+        setInterval(updateTime, 60000);
+        
+        const powerButton = document.getElementById('powerButton');
+        const screen = document.getElementById('screen');
+        const settingsIcon = document.getElementById('settingsIcon');
+        const settingsApp = document.getElementById('settingsApp');
+        const homeButton = document.getElementById('homeButton');
+        const volumeUp = document.getElementById('volumeUp');
+        const volumeDown = document.getElementById('volumeDown');
+        const volumeIndicator = document.getElementById('volumeIndicator');
+        
+        // Блокировка экрана
+        powerButton.addEventListener('click', function() {
+            if (!screen.classList.contains('app-open')) {
+                screen.classList.toggle('locked');
+            }
+        });
+        
+        // Открытие приложения
+        settingsIcon.addEventListener('click', function() {
+            screen.classList.add('app-open');
+        });
+        
+        // Закрытие приложения
+        homeButton.addEventListener('click', function() {
+            screen.classList.remove('app-open');
+        });
+        
+        // Генерация случайной прошивки
+        function generateRandomFirmware() {
+            const chars = 'ABCDEF0123456789';
+            let result = '';
+            for (let i = 0; i < 12; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('firmwareVersion').textContent = result;
+        }
+        
+        // Обработка кнопок настроек
+        document.querySelectorAll('.settings-button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Удаляем класс active у всех кнопок в этой группе
+                this.parentElement.querySelectorAll('.settings-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                // Добавляем класс active только к нажатой кнопке
+                this.classList.add('active');
+                
+                // Если это кнопка скорости анимации
+                if (this.dataset.speed) {
+                    const speed = parseFloat(this.dataset.speed);
+                    document.documentElement.style.setProperty('--animation-speed', speed);
+                }
+                
+                // Если это кнопка стиля иконок
+                if (this.dataset.style) {
+                    document.documentElement.style.setProperty('--icon-style', this.dataset.style);
+                    // Здесь можно добавить логику изменения стиля иконок
+                }
+                
+                // Если это кнопка размера иконок
+                if (this.dataset.size) {
+                    const size = parseFloat(this.dataset.size);
+                    document.documentElement.style.setProperty('--icon-size', size);
+                    settingsIcon.style.width = `${60 * size}px`;
+                    settingsIcon.style.height = `${60 * size}px`;
+                    settingsIcon.style.fontSize = `${24 * size}px`;
+                }
+            });
+        });
+        
+        // Показать индикатор громкости
+        function showVolumeIndicator() {
+            clearTimeout(volumeTimeout);
+            volumeIndicator.classList.add('active');
+            
+            // Обновляем CSS переменную
+            document.documentElement.style.setProperty('--volume-level', volume);
+            
+            // Скрыть через 1 секунду бездействия
+            volumeTimeout = setTimeout(() => {
+                volumeIndicator.classList.remove('active');
+            }, 1000);
+        }
+        
+        // Регулировка громкости
+        function changeVolume(direction) {
+            if (direction === 'up') {
+                volume = Math.min(1, volume + 0.15);
+            } else {
+                volume = Math.max(0, volume - 0.15);
+            }
+            
+            showVolumeIndicator();
+        }
+        
+        // Обработка кнопок громкости
+        volumeUp.addEventListener('click', () => changeVolume('up'));
+        volumeDown.addEventListener('click', () => changeVolume('down'));
+        
+        // Инициализация
+        generateRandomFirmware();
+        document.documentElement.style.setProperty('--volume-level', volume);
+    </script>
+</body>
+              </html>
